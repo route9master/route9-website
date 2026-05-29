@@ -496,7 +496,7 @@ input, textarea, select {
   position: relative;
   z-index: 2; /* ::before / ::after 그라디언트(z-index:1) 위에 위치 */
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 2px;
 }
 
