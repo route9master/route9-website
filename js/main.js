@@ -1,314 +1,482 @@
 /* =====================================================
-   루트9 (Route9) Official Website — main.js
+   Route9 — main.js  v3.0  (GSAP + Premium UX)
    ===================================================== */
-
 'use strict';
 
-/* ── DOM Ready ── */
+/* ── Wait for DOM ── */
 document.addEventListener('DOMContentLoaded', () => {
-  initNavbar();
-  initHamburger();
-  initHeroParticles();
+  gsap.registerPlugin(ScrollTrigger);
+
+  initCursor();
+  initNav();
+  initHeroAnimation();
   initScrollReveal();
+  initMarquee();
   initCounters();
-  initServiceTabs();
-  initCardModal();
-  initContactForm();
-  initSmoothScroll();
+  initTabs();
+  initModal();
+  initMagnetic();
+  initContact();
   initLogoFallback();
 });
 
-/* ── Navbar Scroll ── */
-function initNavbar() {
-  const navbar = document.getElementById('navbar');
-  if (!navbar) return;
+/* ════════════════════════════════════════
+   CUSTOM CURSOR
+════════════════════════════════════════ */
+function initCursor() {
+  const ring = document.getElementById('cursor-ring');
+  const dot  = document.getElementById('cursor-dot');
+  if (!ring || !dot) return;
 
-  function updateNavbar() {
-    if (window.scrollY > 20) {
-      navbar.classList.add('scrolled');
-    } else {
-      navbar.classList.remove('scrolled');
-    }
-  }
+  let mx = -100, my = -100;
+  let rx = -100, ry = -100;
+  let rafId;
 
-  window.addEventListener('scroll', updateNavbar, { passive: true });
-  updateNavbar();
-}
-
-/* ── Hamburger Menu ── */
-function initHamburger() {
-  const hamburger = document.getElementById('hamburger');
-  const navMenu   = document.getElementById('navMenu');
-  if (!hamburger || !navMenu) return;
-
-  hamburger.addEventListener('click', () => {
-    const isOpen = navMenu.classList.toggle('open');
-    hamburger.classList.toggle('open', isOpen);
-    hamburger.setAttribute('aria-expanded', isOpen);
-    document.body.style.overflow = isOpen ? 'hidden' : '';
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX;
+    my = e.clientY;
+    dot.style.left = mx + 'px';
+    dot.style.top  = my + 'px';
   });
 
-  navMenu.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', () => {
-      navMenu.classList.remove('open');
-      hamburger.classList.remove('open');
-      hamburger.setAttribute('aria-expanded', 'false');
-      document.body.style.overflow = '';
+  function tickCursor() {
+    rx += (mx - rx) * 0.14;
+    ry += (my - ry) * 0.14;
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+    rafId = requestAnimationFrame(tickCursor);
+  }
+  tickCursor();
+
+  /* Hover state on interactive elements */
+  const hoverTargets = 'a, button, .svc-card, .why-card, .stat-item, input, textarea, label';
+  document.querySelectorAll(hoverTargets).forEach(el => {
+    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+  });
+
+  /* Hide/show on leave/enter window */
+  document.addEventListener('mouseleave', () => {
+    ring.style.opacity = '0';
+    dot.style.opacity  = '0';
+  });
+  document.addEventListener('mouseenter', () => {
+    ring.style.opacity = '1';
+    dot.style.opacity  = '1';
+  });
+}
+
+/* ════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════ */
+function initNav() {
+  const nav    = document.getElementById('nav');
+  const burger = document.getElementById('burger');
+  const links  = document.getElementById('navLinks');
+  if (!nav) return;
+
+  /* Scrolled state */
+  const updateNav = () => {
+    nav.classList.toggle('scrolled', window.scrollY > 30);
+  };
+  window.addEventListener('scroll', updateNav, { passive: true });
+  updateNav();
+
+  /* Hamburger */
+  if (burger && links) {
+    burger.addEventListener('click', () => {
+      const open = links.classList.toggle('open');
+      burger.classList.toggle('open', open);
+      burger.setAttribute('aria-expanded', open);
+      document.body.style.overflow = open ? 'hidden' : '';
     });
-  });
 
-  document.addEventListener('click', (e) => {
-    if (!navbar.contains(e.target) && navMenu.classList.contains('open')) {
-      navMenu.classList.remove('open');
-      hamburger.classList.remove('open');
-      hamburger.setAttribute('aria-expanded', 'false');
-      document.body.style.overflow = '';
-    }
-  });
-}
+    links.querySelectorAll('.nl').forEach(a => {
+      a.addEventListener('click', () => {
+        links.classList.remove('open');
+        burger.classList.remove('open');
+        burger.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+      });
+    });
 
-/* ── Hero Particles ── */
-function initHeroParticles() {
-  const container = document.getElementById('heroParticles');
-  if (!container) return;
-
-  const count = 28;
-  const colors = ['rgba(255,255,255,', 'rgba(240,171,0,', 'rgba(14,165,233,', 'rgba(46,139,87,'];
-
-  for (let i = 0; i < count; i++) {
-    const p = document.createElement('div');
-    const size = Math.random() * 5 + 2;
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    const opacity = Math.random() * 0.3 + 0.1;
-    const dur = (Math.random() * 10 + 6).toFixed(1);
-    const delay = (Math.random() * 6).toFixed(1);
-    const tx = (Math.random() * 60 - 30).toFixed(0);
-    const ty = (Math.random() * 60 - 30).toFixed(0);
-
-    p.className = 'particle';
-    p.style.cssText = `
-      width:${size}px; height:${size}px;
-      left:${Math.random()*100}%;
-      top:${Math.random()*100}%;
-      background:${color}${opacity});
-      --dur:${dur}s;
-      --delay:-${delay}s;
-      --tx:${tx}px;
-      --ty:${ty}px;
-      --op-min:${(opacity*0.5).toFixed(2)};
-      --op-max:${(opacity).toFixed(2)};
-    `;
-    container.appendChild(p);
+    document.addEventListener('click', e => {
+      if (!nav.contains(e.target) && links.classList.contains('open')) {
+        links.classList.remove('open');
+        burger.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
   }
 }
 
-/* ── Scroll Reveal (Intersection Observer) ── */
+/* ════════════════════════════════════════
+   HERO ANIMATION  (GSAP)
+════════════════════════════════════════ */
+function initHeroAnimation() {
+  const words = document.querySelectorAll('.h-word');
+  const badge = document.querySelector('.hero-badge');
+  const sub   = document.querySelector('.hero-sub');
+  const btns  = document.querySelector('.hero-actions');
+  const scroll= document.querySelector('.hero-scroll');
+
+  if (!words.length) return;
+
+  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+  /* Badge */
+  if (badge) {
+    tl.to(badge, { opacity: 1, y: 0, duration: .7, ease: 'power2.out' }, 0.2);
+  }
+
+  /* Words slide up from masked overflow */
+  tl.to(words, {
+    y: 0,
+    duration: .9,
+    stagger: 0.07,
+    ease: 'power3.out'
+  }, 0.45);
+
+  /* Subtitle */
+  if (sub) {
+    tl.to(sub, { opacity: 1, y: 0, duration: .7 }, '-=0.3');
+  }
+
+  /* Buttons */
+  if (btns) {
+    tl.to(btns, { opacity: 1, y: 0, duration: .6 }, '-=0.4');
+  }
+
+  /* Scroll hint */
+  if (scroll) {
+    tl.to(scroll, { opacity: 1, duration: .6 }, '-=0.2');
+  }
+
+  /* Subtle video parallax */
+  const video = document.querySelector('.hero-video');
+  if (video) {
+    gsap.to(video, {
+      scale: 1,
+      y: '8%',
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 1
+      }
+    });
+  }
+}
+
+/* ════════════════════════════════════════
+   SCROLL REVEAL  (GSAP ScrollTrigger)
+════════════════════════════════════════ */
 function initScrollReveal() {
-  const elements = document.querySelectorAll('.reveal');
+  const elements = document.querySelectorAll('.gsap-reveal');
   if (!elements.length) return;
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry, idx) => {
-      if (entry.isIntersecting) {
-        /* Stagger sibling cards */
-        const siblings = entry.target.parentElement
-          ? Array.from(entry.target.parentElement.querySelectorAll('.reveal:not(.visible)'))
-          : [];
-        const delay = siblings.includes(entry.target)
-          ? siblings.indexOf(entry.target) * 60
-          : 0;
-
-        setTimeout(() => {
-          entry.target.classList.add('visible');
-        }, Math.min(delay, 400));
-
-        observer.unobserve(entry.target);
+  elements.forEach(el => {
+    gsap.to(el, {
+      opacity: 1,
+      y: 0,
+      duration: .85,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: el,
+        start: 'top 88%',
+        once: true
       }
     });
-  }, {
-    threshold: 0.12,
-    rootMargin: '0px 0px -40px 0px'
   });
 
-  elements.forEach(el => observer.observe(el));
+  /* Stats reveal */
+  gsap.utils.toArray('.stat-item').forEach((el, i) => {
+    gsap.fromTo(el,
+      { opacity: 0, y: 30 },
+      {
+        opacity: 1, y: 0,
+        duration: .7,
+        delay: i * 0.12,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: el, start: 'top 85%', once: true }
+      }
+    );
+  });
+
+  /* Why cards stagger */
+  ScrollTrigger.batch('.why-card', {
+    onEnter: batch => gsap.to(batch, {
+      opacity: 1, y: 0, duration: .8,
+      stagger: 0.15, ease: 'power3.out'
+    }),
+    start: 'top 85%',
+    once: true
+  });
 }
 
-/* ── Counter Animation ── */
+/* ════════════════════════════════════════
+   MARQUEE  (CSS animation — ensure double track)
+════════════════════════════════════════ */
+function initMarquee() {
+  const track = document.querySelector('.marquee-track');
+  if (!track) return;
+  /* Duplicate track content for seamless loop */
+  track.innerHTML += track.innerHTML;
+}
+
+/* ════════════════════════════════════════
+   COUNTER ANIMATION
+════════════════════════════════════════ */
 function initCounters() {
-  const statItems = document.querySelectorAll('.stat-item');
-  if (!statItems.length) return;
+  const items = document.querySelectorAll('.stat-item[data-target]');
+  if (!items.length) return;
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const item = entry.target;
-        const countEl = item.querySelector('.count');
-        const target = parseInt(item.dataset.target, 10);
-        if (!countEl || isNaN(target)) return;
+  items.forEach(item => {
+    const countEl = item.querySelector('.count');
+    const target  = parseInt(item.dataset.target, 10);
+    if (!countEl || isNaN(target)) return;
 
-        animateCounter(countEl, 0, target, 1800);
-        observer.unobserve(item);
+    let triggered = false;
+
+    ScrollTrigger.create({
+      trigger: item,
+      start: 'top 80%',
+      once: true,
+      onEnter: () => {
+        if (triggered) return;
+        triggered = true;
+        animateCount(countEl, target);
       }
     });
-  }, { threshold: 0.4 });
-
-  statItems.forEach(item => observer.observe(item));
+  });
 }
 
-function animateCounter(el, from, to, duration) {
-  const startTime = performance.now();
+function animateCount(el, to) {
+  const obj  = { val: 0 };
+  const dur  = to > 100 ? 2.2 : 1.8;
 
-  function update(currentTime) {
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    /* Ease out cubic */
-    const eased = 1 - Math.pow(1 - progress, 3);
-    const current = Math.round(from + (to - from) * eased);
-    el.textContent = current.toLocaleString('ko-KR');
-
-    if (progress < 1) {
-      requestAnimationFrame(update);
-    } else {
+  gsap.to(obj, {
+    val: to,
+    duration: dur,
+    ease: 'power2.out',
+    onUpdate: () => {
+      el.textContent = Math.round(obj.val).toLocaleString('ko-KR');
+    },
+    onComplete: () => {
       el.textContent = to.toLocaleString('ko-KR');
     }
-  }
-
-  requestAnimationFrame(update);
+  });
 }
 
-/* ── Service Tabs ── */
-function initServiceTabs() {
-  const tabBtns = document.querySelectorAll('.tab-btn');
-  if (!tabBtns.length) return;
+/* ════════════════════════════════════════
+   SERVICE TABS
+════════════════════════════════════════ */
+function initTabs() {
+  const btns = document.querySelectorAll('.tab-btn');
+  if (!btns.length) return;
 
-  tabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const tabId = btn.dataset.tab;
-      switchTab(tabId);
-    });
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
 }
 
 function switchTab(tabId) {
-  const tabBtns    = document.querySelectorAll('.tab-btn');
-  const tabContents = document.querySelectorAll('.tab-content');
+  /* Buttons */
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tabId);
+  });
+  /* Panes */
+  document.querySelectorAll('.tab-pane').forEach(p => {
+    const isTarget = p.id === `tab-${tabId}`;
+    p.classList.toggle('active', isTarget);
 
-  tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
-
-  tabContents.forEach(c => {
-    const isTarget = c.id === `tab-${tabId}`;
-    c.classList.toggle('active', isTarget);
     if (isTarget) {
-      /* Re-trigger reveal animations inside the new tab */
-      c.querySelectorAll('.reveal').forEach(el => {
-        if (!el.classList.contains('visible')) return;
-        /* Already visible, skip */
-      });
-      /* Trigger fresh reveals */
-      const freshReveals = c.querySelectorAll('.reveal:not(.visible)');
-      freshReveals.forEach((el, i) => {
-        setTimeout(() => el.classList.add('visible'), i * 60);
+      /* Trigger reveals in new pane */
+      p.querySelectorAll('.gsap-reveal').forEach((el, i) => {
+        gsap.fromTo(el,
+          { opacity: 0, y: 24 },
+          { opacity: 1, y: 0, duration: .6, delay: i * 0.05, ease: 'power3.out' }
+        );
       });
     }
   });
 }
 
-/* Make switchTab globally accessible for footer links */
+/* Expose for footer links */
 window.switchTab = switchTab;
 
-/* ── Service Card Modal ── */
-function initCardModal() {
-  const overlay = document.getElementById('serviceModal');
-  if (!overlay) return;
+/* ════════════════════════════════════════
+   FULLSCREEN SERVICE MODAL
+════════════════════════════════════════ */
+function initModal() {
+  const modal     = document.getElementById('svcModal');
+  const closeBtn  = document.getElementById('svcModalClose');
+  const modalCta  = document.getElementById('modalCta');
+  if (!modal) return;
 
-  /* Add "자세히 보기" hint to all cards */
-  document.querySelectorAll('[data-card]').forEach(card => {
-    const hint = document.createElement('div');
-    hint.className = 'card-hint';
-    hint.setAttribute('aria-hidden', 'true');
-    hint.innerHTML = '자세히 보기 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M3 8h10M9 4l4 4-4 4"/></svg>';
-    card.appendChild(hint);
+  /* ── Open on card click ── */
+  document.querySelectorAll('.svc-card').forEach(card => {
+    card.addEventListener('click', e => {
+      /* Ignore clicks on contact CTAs inside svc-body */
+      if (e.target.closest('.svc-cta')) return;
+      openModal(card);
+    });
   });
 
-  /* Card click → open modal */
-  document.addEventListener('click', (e) => {
-    if (e.target.closest('#serviceModal')) return;
-    const card = e.target.closest('[data-card]');
-    if (!card) return;
-    openServiceModal(card);
+  /* ── Close handlers ── */
+  closeBtn?.addEventListener('click', closeModal);
+
+  /* Click overlay backdrop (outside modal-box) */
+  modal.addEventListener('click', e => {
+    if (!e.target.closest('.svc-modal-box') && !e.target.closest('.svc-modal-close')) {
+      closeModal();
+    }
   });
 
-  /* Close on overlay background click */
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeServiceModal();
+  /* ESC key */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
   });
 
-  /* Close button */
-  overlay.querySelector('.modal-close').addEventListener('click', closeServiceModal);
-
-  /* Consult button also closes modal before navigating */
-  overlay.querySelector('.modal-consult-btn').addEventListener('click', closeServiceModal);
-
-  /* Escape key */
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeServiceModal();
+  /* CTA: close modal then scroll to contact */
+  modalCta?.addEventListener('click', () => {
+    closeModal();
   });
 }
 
-function openServiceModal(card) {
-  const overlay = document.getElementById('serviceModal');
+function openModal(card) {
+  const modal = document.getElementById('svcModal');
+  if (!modal) return;
+
+  /* ── Populate content ── */
 
   /* Icon */
-  const iconEl = card.querySelector('.sc-icon');
-  const iconWrap = overlay.querySelector('.modal-icon-wrap');
-  iconWrap.innerHTML = iconEl ? iconEl.outerHTML : '';
+  const icoEl = card.querySelector('.svc-ico');
+  const icoWrap = document.getElementById('modalIco');
+  if (icoWrap && icoEl) {
+    icoWrap.innerHTML = icoEl.innerHTML;
+    /* Force icon to gold color */
+    icoWrap.querySelectorAll('svg').forEach(s => {
+      s.style.width  = '32px';
+      s.style.height = '32px';
+      s.style.color  = 'var(--gold)';
+    });
+  }
+
+  /* Channel label (which tab is active) */
+  const activeTab = document.querySelector('.tab-btn.active');
+  const labelMap  = {
+    google: 'Google Ads', naver: 'Naver Ads',
+    kakao:  'Kakao Ads',  meta:  'Meta Ads',
+    aeo:    'AEO',        prod:  'Web & Video Production'
+  };
+  const tabId  = activeTab?.dataset.tab || '';
+  const label  = document.getElementById('modalLabel');
+  if (label) label.textContent = labelMap[tabId] || 'Service Detail';
 
   /* Title */
-  const titleEl = card.querySelector('.sc-header-text h4');
-  overlay.querySelector('.modal-title').textContent = titleEl ? titleEl.textContent : '';
+  const titleEl = card.querySelector('.svc-head h4');
+  const modalTitle = document.getElementById('modalTitle');
+  if (modalTitle) modalTitle.textContent = titleEl?.textContent?.trim() || '';
 
-  /* Description */
-  const descEl = card.querySelector('.sc-desc');
-  overlay.querySelector('.modal-desc').innerHTML = descEl ? descEl.innerHTML : '';
+  /* Short summary */
+  const shortEl = card.querySelector('.svc-short');
+  const modalShort = document.getElementById('modalShort');
+  if (modalShort) modalShort.textContent = shortEl?.textContent?.trim() || '';
 
-  /* Detail grid items */
-  const gridEl = card.querySelector('.sc-detail-grid');
-  overlay.querySelector('.modal-detail-grid').innerHTML = gridEl ? gridEl.innerHTML : '';
+  /* Full description */
+  const descEl = card.querySelector('.svc-desc');
+  const modalDesc = document.getElementById('modalDesc');
+  if (modalDesc) {
+    modalDesc.textContent = descEl?.textContent?.trim() || shortEl?.textContent?.trim() || '';
+  }
 
-  overlay.classList.add('open');
+  /* Meta items */
+  const metaEls = card.querySelectorAll('.svc-meta');
+  const modalMetas = document.getElementById('modalMetas');
+  if (modalMetas) {
+    modalMetas.innerHTML = '';
+    metaEls.forEach(meta => {
+      const k = meta.querySelector('.meta-k');
+      const p = meta.querySelector('p');
+      if (!k && !p) return;
+      const div = document.createElement('div');
+      div.className = 'svc-modal-meta';
+      div.innerHTML = `
+        <span class="svc-modal-meta-k">${k?.textContent?.trim() || ''}</span>
+        <p>${p?.textContent?.trim() || ''}</p>
+      `;
+      modalMetas.appendChild(div);
+    });
+  }
+
+  /* ── Show modal ── */
+  modal.setAttribute('aria-hidden', 'false');
+  modal.classList.add('open');
   document.body.style.overflow = 'hidden';
+
+  /* GSAP animation: box slides up + fades in */
+  gsap.fromTo('.svc-modal-box',
+    { scale: 0.88, y: 40, opacity: 0 },
+    { scale: 1, y: 0, opacity: 1, duration: 0.55, ease: 'power3.out', clearProps: 'transform,opacity' }
+  );
 }
 
-function closeServiceModal() {
-  const overlay = document.getElementById('serviceModal');
-  if (!overlay) return;
-  overlay.classList.remove('open');
-  document.body.style.overflow = '';
+function closeModal() {
+  const modal = document.getElementById('svcModal');
+  if (!modal || !modal.classList.contains('open')) return;
+
+  /* GSAP out */
+  gsap.to('.svc-modal-box', {
+    scale: 0.92, y: 24, opacity: 0,
+    duration: 0.3, ease: 'power2.in',
+    onComplete: () => {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+  });
 }
 
-/* ── Contact Form ── */
-function initContactForm() {
+/* ════════════════════════════════════════
+   MAGNETIC BUTTONS
+════════════════════════════════════════ */
+function initMagnetic() {
+  document.querySelectorAll('.magnetic').forEach(el => {
+    el.addEventListener('mousemove', e => {
+      const rect = el.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width  / 2;
+      const y = e.clientY - rect.top  - rect.height / 2;
+      gsap.to(el, { x: x * 0.28, y: y * 0.28, duration: .4, ease: 'power3.out' });
+    });
+    el.addEventListener('mouseleave', () => {
+      gsap.to(el, { x: 0, y: 0, duration: .5, ease: 'elastic.out(1, 0.5)' });
+    });
+  });
+}
+
+/* ════════════════════════════════════════
+   CONTACT FORM
+════════════════════════════════════════ */
+function initContact() {
   const form      = document.getElementById('contactForm');
   const submitBtn = document.getElementById('submitBtn');
   const formMsg   = document.getElementById('formMsg');
   if (!form) return;
 
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', async e => {
     e.preventDefault();
-
-    /* Validate */
     if (!validateForm(form)) return;
 
-    /* UI: Loading state */
-    const btnText    = submitBtn.querySelector('.btn-text');
-    const btnLoading = submitBtn.querySelector('.btn-loading');
+    const btnTxt  = submitBtn.querySelector('.btn-txt');
+    const btnSpin = submitBtn.querySelector('.btn-spin');
     submitBtn.disabled = true;
-    btnText.style.display    = 'none';
-    btnLoading.style.display = 'inline';
+    if (btnTxt)  btnTxt.style.display  = 'none';
+    if (btnSpin) btnSpin.style.display = 'inline';
     formMsg.className = 'form-msg';
-    formMsg.style.display = 'none';
+    formMsg.textContent = '';
 
-    /* Collect data */
     const data = {
       company: form.company.value.trim(),
       email:   form.email.value.trim(),
@@ -318,107 +486,107 @@ function initContactForm() {
     };
 
     try {
-      /* Try contact.php first, fall back to mailto */
-      const response = await fetch('contact.php', {
+      const res = await fetch('contact.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
         signal: AbortSignal.timeout(5000),
       });
-
-      if (response.ok) {
-        showFormMsg('success', '상담 신청이 완료되었습니다. 24시간 내에 연락드리겠습니다.');
+      if (res.ok) {
+        showMsg('success', '상담 신청이 완료되었습니다. 24시간 내에 연락드리겠습니다.');
         form.reset();
-      } else {
-        throw new Error('server_error');
-      }
+      } else throw new Error();
     } catch {
-      /* Fallback: open mailto */
-      const subject = encodeURIComponent(`[루트9 상담 신청] ${data.company}`);
-      const body = encodeURIComponent(
-        `업체명: ${data.company}\n이메일: ${data.email}\n연락처: ${data.phone}\n사이트: ${data.url || '없음'}\n\n문의내용:\n${data.message}`
-      );
-      window.open(`mailto:route9master@gmail.com?subject=${subject}&body=${body}`, '_blank');
-      showFormMsg('success', '이메일 클라이언트가 열립니다. 전송 후 24시간 내에 연락드리겠습니다.');
+      const sub = encodeURIComponent(`[루트9 상담 신청] ${data.company}`);
+      const bod = encodeURIComponent(`업체명: ${data.company}\n이메일: ${data.email}\n연락처: ${data.phone}\n사이트: ${data.url || '없음'}\n\n문의내용:\n${data.message}`);
+      window.open(`mailto:route9master@gmail.com?subject=${sub}&body=${bod}`, '_blank');
+      showMsg('success', '이메일 클라이언트가 열립니다. 전송 후 24시간 내 연락드리겠습니다.');
       form.reset();
     } finally {
       submitBtn.disabled = false;
-      btnText.style.display    = 'inline';
-      btnLoading.style.display = 'none';
+      if (btnTxt)  btnTxt.style.display  = 'inline';
+      if (btnSpin) btnSpin.style.display = 'none';
     }
   });
 
-  function validateForm(form) {
-    let valid = true;
+  function showMsg(type, text) {
+    formMsg.className = `form-msg ${type}`;
+    formMsg.textContent = text;
+    gsap.fromTo(formMsg, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: .4 });
+  }
 
+  function validateForm(f) {
+    let valid = true;
     ['company', 'email', 'phone', 'message'].forEach(name => {
-      const el = form[name];
+      const el = f[name];
       if (!el) return;
       el.classList.remove('error');
-      if (!el.value.trim()) {
-        el.classList.add('error');
-        valid = false;
-      }
+      if (!el.value.trim()) { el.classList.add('error'); valid = false; }
     });
-
-    const emailEl = form.email;
-    if (emailEl && emailEl.value.trim() && !isValidEmail(emailEl.value)) {
-      emailEl.classList.add('error');
+    if (!f.privacy.checked) {
       valid = false;
+      showMsg('error', '개인정보 수집 및 이용에 동의해주세요.');
     }
-
-    const privacy = form.privacy;
-    if (privacy && !privacy.checked) {
-      showFormMsg('error', '개인정보 수집 및 이용에 동의해주세요.');
-      valid = false;
+    if (!valid && document.querySelector('.error')) {
+      document.querySelector('.error').focus();
     }
-
-    if (!valid && !form.privacy?.checked) {
-      /* Only show generic message if not already showing privacy error */
-    } else if (!valid) {
-      showFormMsg('error', '필수 항목을 모두 입력해주세요.');
-    }
-
     return valid;
   }
 
-  function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
-
-  function showFormMsg(type, msg) {
-    formMsg.className = `form-msg ${type}`;
-    formMsg.textContent = msg;
-    formMsg.style.display = 'block';
-    formMsg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  /* Clear error on input */
-  form.querySelectorAll('input, textarea').forEach(el => {
-    el.addEventListener('input', () => el.classList.remove('error'));
-  });
-}
-
-/* ── Smooth Scroll ── */
-function initSmoothScroll() {
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      const href = this.getAttribute('href');
-      if (href === '#') return;
-      const target = document.querySelector(href);
-      if (!target) return;
-      e.preventDefault();
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  /* Input focus animations */
+  form.querySelectorAll('input, textarea').forEach(input => {
+    input.addEventListener('focus', () => {
+      gsap.to(input, { scale: 1.01, duration: .2, ease: 'power2.out' });
+    });
+    input.addEventListener('blur', () => {
+      gsap.to(input, { scale: 1, duration: .2 });
+      input.classList.remove('error');
     });
   });
 }
 
-/* ── Logo Fallback ── */
+/* ════════════════════════════════════════
+   SMOOTH SCROLL
+════════════════════════════════════════ */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const id = a.getAttribute('href').slice(1);
+    const target = document.getElementById(id);
+    if (!target) return;
+    e.preventDefault();
+    const offset = 76;
+    const top = target.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top, behavior: 'smooth' });
+  });
+});
+
+/* ════════════════════════════════════════
+   LOGO FALLBACK
+════════════════════════════════════════ */
 function initLogoFallback() {
-  document.querySelectorAll('.logo-img').forEach(img => {
-    img.addEventListener('error', function () {
-      this.classList.add('broken');
-      this.style.display = 'none';
-    });
+  document.querySelectorAll('.nav-logo-img, .footer-logo-img').forEach(img => {
+    img.addEventListener('error', () => { img.style.display = 'none'; });
   });
 }
+
+/* ════════════════════════════════════════
+   SECTION SCROLL ANIMATIONS (extras)
+════════════════════════════════════════ */
+/* Stagger service cards on first tab */
+window.addEventListener('load', () => {
+  const firstPane = document.querySelector('.tab-pane.active');
+  if (!firstPane) return;
+
+  firstPane.querySelectorAll('.svc-card').forEach((el, i) => {
+    gsap.fromTo(el,
+      { opacity: 0, y: 32 },
+      {
+        opacity: 1, y: 0,
+        duration: .65,
+        delay: 0.1 + i * 0.06,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: el, start: 'top 90%', once: true }
+      }
+    );
+  });
+});
