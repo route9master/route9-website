@@ -1106,20 +1106,15 @@ a.ci-val:hover { color: var(--gold); }
 .form-msg.error   { background: rgba(239,68,68,0.08);  color: #dc2626; border: 1px solid rgba(239,68,68,0.2); }
 
 /* ─────────────────────────────────────
-   FOOTER  (dark navy — contrast with light sections)
+   FOOTER  (light — matches overall theme)
 ───────────────────────────────────── */
 .footer {
-  background: #0f172a;
-  /* Restore dark-theme variables within footer scope */
-  --gray1: rgba(255,255,255,0.88);
-  --gray2: rgba(255,255,255,0.55);
-  --gray3: rgba(255,255,255,0.35);
-  --border: rgba(255,255,255,0.10);
-  --border2: rgba(255,255,255,0.16);
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
 }
 .footer-top {
   padding: 80px 0 56px;
-  border-bottom: 1px solid rgba(255,255,255,0.10);
+  border-bottom: 1px solid var(--border);
 }
 .footer-grid {
   display: grid;
@@ -1133,7 +1128,7 @@ a.ci-val:hover { color: var(--gold); }
   font-family: var(--font-en);
   font-size: 20px;
   font-weight: 900;
-  color: #ffffff;
+  color: var(--gray1);
   letter-spacing: -.02em;
   margin-bottom: 14px;
   text-decoration: none;
@@ -1143,10 +1138,10 @@ a.ci-val:hover { color: var(--gold); }
 .footer-tag {
   font-size: 14px;
   font-weight: 700;
-  color: rgba(255,255,255,0.65);
+  color: var(--gray1);
   margin-bottom: 10px;
 }
-.footer-desc { font-size: 13px; color: rgba(255,255,255,0.38); line-height: 1.75; }
+.footer-desc { font-size: 13px; color: var(--gray3); line-height: 1.75; }
 
 .footer-col h4 {
   font-family: var(--font-en);
@@ -1158,15 +1153,15 @@ a.ci-val:hover { color: var(--gold); }
   margin-bottom: 20px;
 }
 .footer-col ul { display: flex; flex-direction: column; gap: 10px; }
-.footer-col a { font-size: 13.5px; color: rgba(255,255,255,0.45); transition: color var(--t3); cursor: none; }
-.footer-col a:hover { color: #ffffff; }
-.footer-col p { font-size: 13.5px; color: rgba(255,255,255,0.45); margin-bottom: 8px; }
+.footer-col a { font-size: 13.5px; color: var(--gray3); transition: color var(--t3); cursor: none; }
+.footer-col a:hover { color: var(--gray1); }
+.footer-col p { font-size: 13.5px; color: var(--gray3); margin-bottom: 8px; }
 
 .footer-bottom { padding: 24px 0; }
 .footer-bottom .container { text-align: center; }
-.footer-bottom p { font-size: 12px; color: rgba(255,255,255,0.20); line-height: 1.9; }
-.footer-bottom a { color: rgba(255,255,255,0.30); transition: color var(--t3); cursor: none; }
-.footer-bottom a:hover { color: rgba(255,255,255,0.65); }
+.footer-bottom p { font-size: 12px; color: var(--gray3); line-height: 1.9; }
+.footer-bottom a { color: var(--gray2); transition: color var(--t3); cursor: none; }
+.footer-bottom a:hover { color: var(--gray1); }
 .copy { margin-top: 8px; }
 
 /* ─────────────────────────────────────
@@ -1256,14 +1251,14 @@ a.ci-val:hover { color: var(--gold); }
 .svc-card   { cursor: none; }
 
 /* ─────────────────────────────────────
-   FULLSCREEN SERVICE MODAL  (stays dark)
+   FULLSCREEN SERVICE MODAL  (light theme)
 ───────────────────────────────────── */
 .svc-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(235,245,255,0.92);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
   z-index: 9500;
   display: flex;
   align-items: center;
@@ -1273,12 +1268,6 @@ a.ci-val:hover { color: var(--gold); }
   pointer-events: none;
   transition: opacity 0.35s ease;
   overflow-y: auto;
-  /* Restore dark-theme variables inside modal */
-  --gray1: rgba(255,255,255,0.92);
-  --gray2: rgba(255,255,255,0.65);
-  --gray3: rgba(255,255,255,0.40);
-  --border: rgba(255,255,255,0.10);
-  --border2: rgba(255,255,255,0.15);
 }
 .svc-modal.open {
   opacity: 1;
@@ -1289,29 +1278,34 @@ a.ci-val:hover { color: var(--gold); }
   top: 28px; right: 32px;
   width: 52px; height: 52px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(15,23,42,0.06);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255,255,255,0.65);
+  color: var(--gray2);
   transition: all 0.25s ease;
   z-index: 9502;
   cursor: none;
 }
 .svc-modal-close svg { width: 20px; height: 20px; }
 .svc-modal-close:hover {
-  background: rgba(240,171,0,0.12);
+  background: rgba(240,171,0,0.10);
   border-color: var(--gold);
   color: var(--gold);
   transform: rotate(90deg);
 }
 
-/* Modal box (animated by GSAP) */
+/* Modal box — white card floating on frosted backdrop */
 .svc-modal-box {
   width: 100%;
   max-width: 740px;
   margin: auto;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--rxl);
+  padding: 52px;
+  box-shadow: 0 32px 80px rgba(15,23,42,0.12), 0 8px 24px rgba(15,23,42,0.06);
   will-change: transform, opacity;
 }
 
@@ -1345,21 +1339,21 @@ a.ci-val:hover { color: var(--gold); }
   font-family: var(--font-en);
   font-size: clamp(28px, 4.5vw, 52px);
   font-weight: 900;
-  color: #ffffff;
+  color: var(--gray1);
   line-height: 1.08;
   letter-spacing: -.025em;
   margin-bottom: 18px;
 }
 .svc-modal-short {
   font-size: 18px;
-  color: var(--sky2);
+  color: var(--sky);
   line-height: 1.65;
   font-weight: 500;
   margin-bottom: 36px;
 }
 .svc-modal-rule {
   height: 1px;
-  background: rgba(255,255,255,0.12);
+  background: var(--border);
   margin-bottom: 32px;
   position: relative;
 }
@@ -1368,12 +1362,12 @@ a.ci-val:hover { color: var(--gold); }
   position: absolute;
   top: 0; left: 0;
   width: 80px; height: 2px;
-  background: linear-gradient(90deg, var(--gold), var(--sky2));
+  background: linear-gradient(90deg, var(--gold), var(--sky));
   margin-top: -0.5px;
 }
 .svc-modal-desc {
   font-size: 16px;
-  color: rgba(255,255,255,0.65);
+  color: var(--gray2);
   line-height: 1.9;
   margin-bottom: 40px;
 }
@@ -1385,13 +1379,13 @@ a.ci-val:hover { color: var(--gold); }
 }
 .svc-modal-meta {
   padding: 18px 20px;
-  background: rgba(255,255,255,0.025);
-  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(15,23,42,0.03);
+  border: 1px solid var(--border);
   border-left: 3px solid var(--gold);
   border-radius: var(--r);
   transition: background 0.25s;
 }
-.svc-modal-meta:hover { background: rgba(240,171,0,0.04); }
+.svc-modal-meta:hover { background: rgba(240,171,0,0.06); }
 .svc-modal-meta-k {
   display: block;
   font-family: var(--font-en);
@@ -1404,7 +1398,7 @@ a.ci-val:hover { color: var(--gold); }
 }
 .svc-modal-meta p {
   font-size: 13.5px;
-  color: rgba(255,255,255,0.65);
+  color: var(--gray2);
   line-height: 1.55;
 }
 .svc-modal-cta {
@@ -1417,6 +1411,7 @@ a.ci-val:hover { color: var(--gold); }
 
 @media (max-width: 768px) {
   .svc-modal { padding: 80px 20px 40px; align-items: flex-start; }
+  .svc-modal-box { padding: 32px 24px; }
   .svc-modal-close { top: 20px; right: 20px; width: 44px; height: 44px; }
   .svc-modal-title { font-size: clamp(24px, 7vw, 38px); }
   .svc-modal-short { font-size: 16px; }
