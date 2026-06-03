@@ -56,16 +56,28 @@ function initIntroVideo() {
 
   /* ── 음소거 토글 ── */
   if (muteBtn && muteIco) {
+    let muteTouched = false; /* touchstart 처리 후 click 중복 실행 방지 플래그 */
+
     function toggleMute(e) {
       e.preventDefault();
       e.stopPropagation();
       video.muted = !video.muted;
       muteIco.innerHTML = video.muted ? SVG_MUTED : SVG_UNMUTED;
       muteBtn.setAttribute('aria-label', video.muted ? '소리 켜기' : '소리 끄기');
+      /* iOS: muted 변경 시 autoplay 정책으로 영상이 멈출 수 있어 명시적으로 재생 유지 */
+      if (!video.paused) video.play().catch(() => {});
     }
-    /* touchstart: iOS에서 가장 빠르고 확실한 이벤트 */
-    muteBtn.addEventListener('touchstart', toggleMute, { passive: false });
-    muteBtn.addEventListener('click', toggleMute);
+
+    muteBtn.addEventListener('touchstart', e => {
+      muteTouched = true;
+      toggleMute(e);
+    }, { passive: false });
+
+    muteBtn.addEventListener('click', e => {
+      /* touchstart가 이미 처리했으면 click은 건너뜀 */
+      if (muteTouched) { muteTouched = false; return; }
+      toggleMute(e);
+    });
   }
 
   /* ── 커튼 오프닝 전환 ── */
