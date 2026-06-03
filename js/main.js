@@ -25,15 +25,25 @@ document.addEventListener('DOMContentLoaded', () => {
    INTRO VIDEO OVERLAY
 ════════════════════════════════════════ */
 function initIntroVideo() {
-  const overlay = document.getElementById('intro-overlay');
-  const video   = document.getElementById('intro-video');
-  const skipBtn = document.getElementById('intro-skip');
-  const muteBtn = document.getElementById('intro-mute');
-  const muteIco = document.getElementById('intro-mute-icon');
+  const overlay  = document.getElementById('intro-overlay');
+  const video    = document.getElementById('intro-video');
+  const videoBg  = document.getElementById('intro-video-bg');
+  const skipBtn  = document.getElementById('intro-skip');
+  const muteBtn  = document.getElementById('intro-mute');
+  const muteIco  = document.getElementById('intro-mute-icon');
   if (!overlay || !video) return;
 
   /* 인트로 재생 중 스크롤 잠금 */
   document.body.style.overflow = 'hidden';
+
+  /* 블러 배경 영상: 메인 영상과 싱크 (bg는 항상 음소거 유지) */
+  if (videoBg) {
+    video.addEventListener('play', () => {
+      videoBg.currentTime = video.currentTime;
+      videoBg.play().catch(() => {});
+    });
+    video.addEventListener('pause', () => videoBg.pause());
+  }
 
   /* ── SVG 아이콘 ── */
   const SVG_MUTED = `

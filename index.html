@@ -22,6 +22,9 @@
      재생 영상 교체: images/intro-video.mp4 파일을 같은 이름으로 덮어쓰면 됩니다.
 ══════════════════════════════════════ -->
 <div id="intro-overlay" aria-hidden="true">
+  <!-- 모바일 전용 블러 배경 영상 (항상 음소거) -->
+  <video id="intro-video-bg" src="images/intro-video.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
+  <!-- 메인 영상 -->
   <video id="intro-video" src="images/intro-video.mp4" autoplay muted playsinline preload="auto"></video>
   <!-- 좌측 하단: 음소거 토글 버튼 -->
   <button id="intro-mute" class="intro-mute-btn" aria-label="소리 켜기">

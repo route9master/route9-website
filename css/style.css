@@ -90,10 +90,36 @@ input, textarea, select {
 #intro-overlay.hidden {
   display: none;
 }
+/* 모바일 블러 배경 영상 — 데스크톱에서는 숨김 */
+#intro-video-bg {
+  display: none;
+}
+
+/* 메인 영상 — 데스크톱: cover로 꽉 채움 */
 #intro-video {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* ── 모바일: 블러 배경 + contain 메인 ── */
+@media (max-width: 768px) {
+  #intro-video-bg {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(20px);
+    transform: scale(1.1);
+    z-index: 0;
+  }
+  #intro-video {
+    object-fit: contain;
+  }
 }
 
 /* ── 공통 인트로 버튼 기반 ── */
