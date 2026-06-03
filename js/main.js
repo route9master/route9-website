@@ -56,11 +56,15 @@ function initIntroVideo() {
 
   /* ── 음소거 토글 ── */
   if (muteBtn && muteIco) {
-    muteBtn.addEventListener('click', () => {
+    function toggleMute(e) {
+      e.preventDefault();
       video.muted = !video.muted;
       muteIco.innerHTML = video.muted ? SVG_MUTED : SVG_UNMUTED;
       muteBtn.setAttribute('aria-label', video.muted ? '소리 켜기' : '소리 끄기');
-    });
+    }
+    muteBtn.addEventListener('click', toggleMute);
+    /* 모바일 백업: touchend로도 동작 보장 */
+    muteBtn.addEventListener('touchend', toggleMute, { passive: false });
   }
 
   /* ── 커튼 오프닝 전환 ── */
@@ -77,7 +81,7 @@ function initIntroVideo() {
     /* 커튼 패널 2개 생성 (검정, 전체 화면을 좌/우 절반씩 덮음) */
     const cl = document.createElement('div');
     const cr = document.createElement('div');
-    const base = 'position:fixed;top:0;height:100%;background:#000;z-index:10001;will-change:transform;';
+    const base = 'position:fixed;top:0;height:100%;background:#000;z-index:100000;will-change:transform;';
     cl.style.cssText = base + 'left:0;width:50.2%;';
     cr.style.cssText = base + 'right:0;width:50.2%;';
     document.body.appendChild(cl);
@@ -88,7 +92,7 @@ function initIntroVideo() {
     line.style.cssText = [
       'position:fixed;top:0;left:50%;width:2px;height:100%;',
       'background:linear-gradient(to bottom, transparent 0%, #F0AB00 40%, #F0AB00 60%, transparent 100%);',
-      'z-index:10002;transform:translateX(-50%);opacity:0;'
+      'z-index:100001;transform:translateX(-50%);opacity:0;'
     ].join('');
     document.body.appendChild(line);
 
@@ -111,6 +115,7 @@ function initIntroVideo() {
 
   video.addEventListener('ended', dismiss);
   skipBtn?.addEventListener('click', dismiss);
+  skipBtn?.addEventListener('touchend', e => { e.preventDefault(); dismiss(); }, { passive: false });
   video.addEventListener('error', dismiss);
 }
 

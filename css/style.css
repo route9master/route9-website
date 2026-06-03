@@ -93,6 +93,7 @@ input, textarea, select {
 /* 모바일 블러 배경 영상 — 데스크톱에서는 숨김 */
 #intro-video-bg {
   display: none;
+  pointer-events: none; /* 터치 이벤트 차단하지 않음 */
 }
 
 /* 메인 영상 — 데스크톱: cover로 꽉 채움 */
@@ -102,6 +103,7 @@ input, textarea, select {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  pointer-events: none; /* 영상이 버튼 터치 가로채지 않도록 */
 }
 
 /* ── 모바일: 블러 배경 + contain 메인 ── */
@@ -127,7 +129,7 @@ input, textarea, select {
 .intro-mute-btn {
   position: absolute;
   bottom: 36px;
-  z-index: 10001;
+  z-index: 99999; /* 영상/오버레이(10000) 위에 확실히 올림 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -135,8 +137,9 @@ input, textarea, select {
   border: 1px solid rgba(255, 255, 255, 0.35);
   color: #fff;
   cursor: pointer;
-  pointer-events: all;
-  touch-action: manipulation;
+  pointer-events: auto; /* 'all'은 SVG 전용 — HTML은 'auto' */
+  touch-action: manipulation; /* 모바일 300ms 딜레이 제거 */
+  -webkit-tap-highlight-color: transparent;
   backdrop-filter: blur(8px);
   transition: background 0.25s, transform 0.25s;
 }
