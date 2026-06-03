@@ -65,9 +65,7 @@ function initIntroVideo() {
     <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
     <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>`;
 
-  /* ── 음소거 토글 ──
-     muted 상태만 바꿈. 재생 제어는 watchdog에 위임.
-     video.play() 직접 호출 없음 → iOS AbortError 레이스 컨디션 제거 */
+  /* ── 음소거 토글 ── */
   if (muteBtn && muteIco) {
     let muteTouched = false;
 
@@ -77,7 +75,10 @@ function initIntroVideo() {
       video.muted = !video.muted;
       muteIco.innerHTML = video.muted ? SVG_MUTED : SVG_UNMUTED;
       muteBtn.setAttribute('aria-label', video.muted ? '소리 켜기' : '소리 끄기');
-      /* 재생 상태는 건드리지 않음 — watchdog이 필요 시 복구 */
+      /* iOS Safari: muted=false 시 내부적으로 pause 발화.
+         사용자 제스처 컨텍스트(touchstart) 안에서 play()를 호출해야
+         iOS가 오디오 재생을 허용함. 조건 없이 무조건 호출 필수. */
+      video.play().catch(() => {});
     }
 
     muteBtn.addEventListener('touchstart', e => {
