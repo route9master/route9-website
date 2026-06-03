@@ -33,10 +33,13 @@ function initIntroVideo() {
   const muteIco  = document.getElementById('intro-mute-icon');
   if (!overlay || !video) return;
 
+  /* dismissed 플래그를 최상단에 선언 — 모든 리스너에서 안전하게 참조 */
+  let dismissed = false;
+
   /* 인트로 재생 중 스크롤 잠금 */
   document.body.style.overflow = 'hidden';
 
-  /* 블러 배경 영상: 메인 영상과 싱크 (bg는 항상 음소거 유지) */
+  /* ── 블러 배경 영상 싱크 (bg는 항상 음소거 유지) ── */
   if (videoBg) {
     video.addEventListener('play', () => {
       videoBg.currentTime = video.currentTime;
@@ -44,6 +47,14 @@ function initIntroVideo() {
     });
     video.addEventListener('pause', () => videoBg.pause());
   }
+
+  /* ── Pause Watchdog: iOS muted 변경 등 예기치 않은 정지 자동 복구 ──
+     dismiss()가 명시적으로 호출된 경우(dismissed=true)는 복구하지 않음 */
+  video.addEventListener('pause', () => {
+    if (!dismissed && !video.ended) {
+      video.play().catch(() => {});
+    }
+  });
 
   /* ── SVG 아이콘 ── */
   const SVG_MUTED = `
@@ -54,9 +65,11 @@ function initIntroVideo() {
     <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
     <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>`;
 
-  /* ── 음소거 토글 ── */
+  /* ── 음소거 토글 ──
+     muted 상태만 바꿈. 재생 제어는 watchdog에 위임.
+     video.play() 직접 호출 없음 → iOS AbortError 레이스 컨디션 제거 */
   if (muteBtn && muteIco) {
-    let muteTouched = false; /* touchstart 처리 후 click 중복 실행 방지 플래그 */
+    let muteTouched = false;
 
     function toggleMute(e) {
       e.preventDefault();
@@ -64,8 +77,7 @@ function initIntroVideo() {
       video.muted = !video.muted;
       muteIco.innerHTML = video.muted ? SVG_MUTED : SVG_UNMUTED;
       muteBtn.setAttribute('aria-label', video.muted ? '소리 켜기' : '소리 끄기');
-      /* iOS: muted 변경 시 autoplay 정책으로 영상이 멈출 수 있어 명시적으로 재생 유지 */
-      if (!video.paused) video.play().catch(() => {});
+      /* 재생 상태는 건드리지 않음 — watchdog이 필요 시 복구 */
     }
 
     muteBtn.addEventListener('touchstart', e => {
@@ -74,14 +86,12 @@ function initIntroVideo() {
     }, { passive: false });
 
     muteBtn.addEventListener('click', e => {
-      /* touchstart가 이미 처리했으면 click은 건너뜀 */
       if (muteTouched) { muteTouched = false; return; }
       toggleMute(e);
     });
   }
 
   /* ── 커튼 오프닝 전환 ── */
-  let dismissed = false;
   function dismiss(e) {
     if (e) { e.preventDefault(); e.stopPropagation(); }
     if (dismissed) return;
