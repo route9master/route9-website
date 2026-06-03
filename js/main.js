@@ -33,13 +33,11 @@ function initIntroVideo() {
   const muteIco  = document.getElementById('intro-mute-icon');
   if (!overlay || !video) return;
 
-  /* dismissed 플래그를 최상단에 선언 — 모든 리스너에서 안전하게 참조 */
   let dismissed = false;
 
-  /* 인트로 재생 중 스크롤 잠금 */
   document.body.style.overflow = 'hidden';
 
-  /* ── 블러 배경 영상 싱크 (bg는 항상 음소거 유지) ── */
+  /* ── 블러 배경 영상 싱크 ── */
   if (videoBg) {
     video.addEventListener('play', () => {
       videoBg.currentTime = video.currentTime;
@@ -48,99 +46,85 @@ function initIntroVideo() {
     video.addEventListener('pause', () => videoBg.pause());
   }
 
-  /* ── Pause Watchdog: iOS muted 변경 등 예기치 않은 정지 자동 복구 ──
-     dismiss()가 명시적으로 호출된 경우(dismissed=true)는 복구하지 않음 */
-  video.addEventListener('pause', () => {
-    if (!dismissed && !video.ended) {
-      video.play().catch(() => {});
-    }
-  });
-
   /* ── SVG 아이콘 ── */
-  const SVG_MUTED = `
-    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+  const SVG_MUTED = `<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
     <line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>`;
-  const SVG_UNMUTED = `
-    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+  const SVG_UNMUTED = `<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
     <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
     <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>`;
 
-  /* ── 음소거 토글 ── */
+  /* ── 음소거 토글 ──
+     규칙: video.muted 토글만. video.play()/pause() 절대 호출 없음.
+     Watchdog 없음. video 상태를 건드리는 코드 단 한 줄도 없음. */
   if (muteBtn && muteIco) {
-    let muteTouched = false;
+    /* touchend 처리 후 click 이중 발화 방지 플래그 */
+    let muteTouchHandled = false;
 
-    function toggleMute(e) {
-      e.preventDefault();
-      e.stopPropagation();
+    function toggleMute() {
+      /* video 상태를 건드리는 코드 단 한 줄도 없음 — muted 토글만 */
       video.muted = !video.muted;
       muteIco.innerHTML = video.muted ? SVG_MUTED : SVG_UNMUTED;
       muteBtn.setAttribute('aria-label', video.muted ? '소리 켜기' : '소리 끄기');
-      /* iOS Safari: muted=false 시 내부적으로 pause 발화.
-         사용자 제스처 컨텍스트(touchstart) 안에서 play()를 호출해야
-         iOS가 오디오 재생을 허용함. 조건 없이 무조건 호출 필수. */
-      video.play().catch(() => {});
     }
 
-    muteBtn.addEventListener('touchstart', e => {
-      muteTouched = true;
-      toggleMute(e);
+    /* touchend: 터치 완료 시점에만 발화, preventDefault로 후속 click 억제 */
+    muteBtn.addEventListener('touchend', e => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      muteTouchHandled = true;
+      toggleMute();
     }, { passive: false });
 
+    /* click: 데스크톱 폴백 — touchend가 이미 처리했으면 건너뜀 */
     muteBtn.addEventListener('click', e => {
-      if (muteTouched) { muteTouched = false; return; }
-      toggleMute(e);
+      e.stopImmediatePropagation();
+      if (muteTouchHandled) { muteTouchHandled = false; return; }
+      toggleMute();
     });
   }
 
   /* ── 커튼 오프닝 전환 ── */
   function dismiss(e) {
-    if (e) { e.preventDefault(); e.stopPropagation(); }
+    if (e) { e.preventDefault(); e.stopImmediatePropagation(); }
     if (dismissed) return;
     dismissed = true;
 
-    /* 버튼 즉시 숨김 */
     if (skipBtn) skipBtn.style.display = 'none';
     if (muteBtn) muteBtn.style.display = 'none';
     video.pause();
 
-    /* 커튼 패널 2개 생성 (검정, 전체 화면을 좌/우 절반씩 덮음) */
-    const cl = document.createElement('div');
-    const cr = document.createElement('div');
+    const cl   = document.createElement('div');
+    const cr   = document.createElement('div');
     const base = 'position:fixed;top:0;height:100%;background:#000;z-index:100000;will-change:transform;';
     cl.style.cssText = base + 'left:0;width:50.2%;';
     cr.style.cssText = base + 'right:0;width:50.2%;';
     document.body.appendChild(cl);
     document.body.appendChild(cr);
 
-    /* 중앙 골드 라인 (커튼이 갈라지는 선) */
     const line = document.createElement('div');
     line.style.cssText = [
       'position:fixed;top:0;left:50%;width:2px;height:100%;',
-      'background:linear-gradient(to bottom, transparent 0%, #F0AB00 40%, #F0AB00 60%, transparent 100%);',
+      'background:linear-gradient(to bottom,transparent 0%,#F0AB00 40%,#F0AB00 60%,transparent 100%);',
       'z-index:100001;transform:translateX(-50%);opacity:0;'
     ].join('');
     document.body.appendChild(line);
 
-    /* 오버레이 즉시 숨김 (커튼이 이미 덮음) */
     overlay.style.display = 'none';
     document.body.style.overflow = '';
 
-    /* GSAP 커튼 애니메이션 */
-    gsap.timeline({
-      onComplete: () => { cl.remove(); cr.remove(); line.remove(); }
-    })
-    /* 골드 라인 순간 등장 */
-    .to(line, { opacity: 1, duration: 0.12, ease: 'power2.out' }, 0)
-    /* 커튼 양쪽으로 슬라이드 */
-    .to(cl,   { x: '-102%', duration: 1.0, ease: 'expo.inOut' }, 0.08)
-    .to(cr,   { x: '102%',  duration: 1.0, ease: 'expo.inOut' }, 0.08)
-    /* 라인 페이드아웃 */
-    .to(line, { opacity: 0, duration: 0.35, ease: 'power2.in' }, 0.45);
+    gsap.timeline({ onComplete: () => { cl.remove(); cr.remove(); line.remove(); } })
+      .to(line, { opacity: 1, duration: 0.12, ease: 'power2.out' },  0)
+      .to(cl,   { x: '-102%', duration: 1.0, ease: 'expo.inOut' }, 0.08)
+      .to(cr,   { x: '102%',  duration: 1.0, ease: 'expo.inOut' }, 0.08)
+      .to(line, { opacity: 0, duration: 0.35, ease: 'power2.in'  }, 0.45);
   }
 
   video.addEventListener('ended', dismiss);
-  /* touchstart: iOS에서 가장 빠르고 확실한 이벤트 */
-  skipBtn?.addEventListener('touchstart', dismiss, { passive: false });
+  skipBtn?.addEventListener('touchend', e => {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    dismiss(e);
+  }, { passive: false });
   skipBtn?.addEventListener('click', dismiss);
   video.addEventListener('error', dismiss);
 }
