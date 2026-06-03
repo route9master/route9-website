@@ -23,6 +23,14 @@
 ══════════════════════════════════════ -->
 <div id="intro-overlay" aria-hidden="true">
   <video id="intro-video" src="images/intro-video.mp4" autoplay muted playsinline preload="auto"></video>
+  <!-- 좌측 하단: 음소거 토글 버튼 -->
+  <button id="intro-mute" class="intro-mute-btn" aria-label="소리 켜기">
+    <svg id="intro-mute-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+      <line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
+    </svg>
+  </button>
+  <!-- 우측 하단: 스킵 버튼 -->
   <button id="intro-skip" class="intro-skip-btn" aria-label="인트로 건너뛰기">
     SKIP
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h8M7 3l4 4-4 4"/></svg>

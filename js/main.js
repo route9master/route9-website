@@ -28,26 +28,79 @@ function initIntroVideo() {
   const overlay = document.getElementById('intro-overlay');
   const video   = document.getElementById('intro-video');
   const skipBtn = document.getElementById('intro-skip');
+  const muteBtn = document.getElementById('intro-mute');
+  const muteIco = document.getElementById('intro-mute-icon');
   if (!overlay || !video) return;
 
   /* 인트로 재생 중 스크롤 잠금 */
   document.body.style.overflow = 'hidden';
 
-  function dismiss() {
-    overlay.classList.add('fade-out');
-    document.body.style.overflow = '';
-    overlay.addEventListener('transitionend', () => {
-      overlay.classList.add('hidden');
-    }, { once: true });
+  /* ── SVG 아이콘 ── */
+  const SVG_MUTED = `
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+    <line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>`;
+  const SVG_UNMUTED = `
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>`;
+
+  /* ── 음소거 토글 ── */
+  if (muteBtn && muteIco) {
+    muteBtn.addEventListener('click', () => {
+      video.muted = !video.muted;
+      muteIco.innerHTML = video.muted ? SVG_MUTED : SVG_UNMUTED;
+      muteBtn.setAttribute('aria-label', video.muted ? '소리 켜기' : '소리 끄기');
+    });
   }
 
-  /* 영상 끝나면 자연스럽게 전환 */
+  /* ── 커튼 오프닝 전환 ── */
+  let dismissed = false;
+  function dismiss() {
+    if (dismissed) return;
+    dismissed = true;
+
+    /* 버튼 비활성화 */
+    if (skipBtn) skipBtn.style.pointerEvents = 'none';
+    if (muteBtn) muteBtn.style.pointerEvents = 'none';
+    video.pause();
+
+    /* 커튼 패널 2개 생성 (검정, 전체 화면을 좌/우 절반씩 덮음) */
+    const cl = document.createElement('div');
+    const cr = document.createElement('div');
+    const base = 'position:fixed;top:0;height:100%;background:#000;z-index:10001;will-change:transform;';
+    cl.style.cssText = base + 'left:0;width:50.2%;';
+    cr.style.cssText = base + 'right:0;width:50.2%;';
+    document.body.appendChild(cl);
+    document.body.appendChild(cr);
+
+    /* 중앙 골드 라인 (커튼이 갈라지는 선) */
+    const line = document.createElement('div');
+    line.style.cssText = [
+      'position:fixed;top:0;left:50%;width:2px;height:100%;',
+      'background:linear-gradient(to bottom, transparent 0%, #F0AB00 40%, #F0AB00 60%, transparent 100%);',
+      'z-index:10002;transform:translateX(-50%);opacity:0;'
+    ].join('');
+    document.body.appendChild(line);
+
+    /* 오버레이 즉시 숨김 (커튼이 이미 덮음) */
+    overlay.style.display = 'none';
+    document.body.style.overflow = '';
+
+    /* GSAP 커튼 애니메이션 */
+    gsap.timeline({
+      onComplete: () => { cl.remove(); cr.remove(); line.remove(); }
+    })
+    /* 골드 라인 순간 등장 */
+    .to(line, { opacity: 1, duration: 0.12, ease: 'power2.out' }, 0)
+    /* 커튼 양쪽으로 슬라이드 */
+    .to(cl,   { x: '-102%', duration: 1.0, ease: 'expo.inOut' }, 0.08)
+    .to(cr,   { x: '102%',  duration: 1.0, ease: 'expo.inOut' }, 0.08)
+    /* 라인 페이드아웃 */
+    .to(line, { opacity: 0, duration: 0.35, ease: 'power2.in' }, 0.45);
+  }
+
   video.addEventListener('ended', dismiss);
-
-  /* 스킵 버튼 */
   skipBtn?.addEventListener('click', dismiss);
-
-  /* 영상 로드 실패 시 즉시 스킵 (파일 없을 때 대비) */
   video.addEventListener('error', dismiss);
 }
 

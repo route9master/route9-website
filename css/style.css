@@ -86,11 +86,6 @@ input, textarea, select {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.9s ease;
-}
-#intro-overlay.fade-out {
-  opacity: 0;
-  pointer-events: none;
 }
 #intro-overlay.hidden {
   display: none;
@@ -100,31 +95,45 @@ input, textarea, select {
   height: 100%;
   object-fit: cover;
 }
-.intro-skip-btn {
+
+/* ── 공통 인트로 버튼 기반 ── */
+.intro-skip-btn,
+.intro-mute-btn {
   position: absolute;
   bottom: 36px;
-  right: 36px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 22px;
+  justify-content: center;
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.35);
   color: #fff;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.25s, transform 0.25s;
+}
+.intro-skip-btn {
+  right: 36px;
+  gap: 6px;
+  padding: 10px 22px;
   font-family: var(--font-en);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.1em;
   border-radius: 999px;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-  transition: background 0.25s, transform 0.25s;
 }
-.intro-skip-btn:hover {
+.intro-mute-btn {
+  left: 36px;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+}
+.intro-skip-btn:hover,
+.intro-mute-btn:hover {
   background: rgba(255, 255, 255, 0.26);
-  transform: scale(1.05);
+  transform: scale(1.07);
 }
-.intro-skip-btn svg {
+.intro-skip-btn svg,
+.intro-mute-btn svg {
   flex-shrink: 0;
 }
 
