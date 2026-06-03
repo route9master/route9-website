@@ -58,24 +58,26 @@ function initIntroVideo() {
   if (muteBtn && muteIco) {
     function toggleMute(e) {
       e.preventDefault();
+      e.stopPropagation();
       video.muted = !video.muted;
       muteIco.innerHTML = video.muted ? SVG_MUTED : SVG_UNMUTED;
       muteBtn.setAttribute('aria-label', video.muted ? '소리 켜기' : '소리 끄기');
     }
+    /* touchstart: iOS에서 가장 빠르고 확실한 이벤트 */
+    muteBtn.addEventListener('touchstart', toggleMute, { passive: false });
     muteBtn.addEventListener('click', toggleMute);
-    /* 모바일 백업: touchend로도 동작 보장 */
-    muteBtn.addEventListener('touchend', toggleMute, { passive: false });
   }
 
   /* ── 커튼 오프닝 전환 ── */
   let dismissed = false;
-  function dismiss() {
+  function dismiss(e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
     if (dismissed) return;
     dismissed = true;
 
-    /* 버튼 비활성화 */
-    if (skipBtn) skipBtn.style.pointerEvents = 'none';
-    if (muteBtn) muteBtn.style.pointerEvents = 'none';
+    /* 버튼 즉시 숨김 */
+    if (skipBtn) skipBtn.style.display = 'none';
+    if (muteBtn) muteBtn.style.display = 'none';
     video.pause();
 
     /* 커튼 패널 2개 생성 (검정, 전체 화면을 좌/우 절반씩 덮음) */
@@ -114,8 +116,9 @@ function initIntroVideo() {
   }
 
   video.addEventListener('ended', dismiss);
+  /* touchstart: iOS에서 가장 빠르고 확실한 이벤트 */
+  skipBtn?.addEventListener('touchstart', dismiss, { passive: false });
   skipBtn?.addEventListener('click', dismiss);
-  skipBtn?.addEventListener('touchend', e => { e.preventDefault(); dismiss(); }, { passive: false });
   video.addEventListener('error', dismiss);
 }
 
