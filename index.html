@@ -17,6 +17,18 @@
 </head>
 <body>
 
+<!-- ══════════════════════════════════════
+     INTRO VIDEO OVERLAY
+     재생 영상 교체: images/intro-video.mp4 파일을 같은 이름으로 덮어쓰면 됩니다.
+══════════════════════════════════════ -->
+<div id="intro-overlay" aria-hidden="true">
+  <video id="intro-video" src="images/intro-video.mp4" autoplay muted playsinline preload="auto"></video>
+  <button id="intro-skip" class="intro-skip-btn" aria-label="인트로 건너뛰기">
+    SKIP
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h8M7 3l4 4-4 4"/></svg>
+  </button>
+</div>
+
 <!-- ░░ Custom Cursor ░░ -->
 <div id="cursor-ring"></div>
 <div id="cursor-dot"></div>
@@ -49,6 +61,7 @@
      HERO
 ══════════════════════════════════════ -->
 <section class="hero" id="hero">
+  <!-- Hero 배경 영상 교체: images/hero-video.mp4 파일을 같은 이름으로 덮어쓰면 됩니다. -->
   <video class="hero-video" src="images/hero-video.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
   <div class="hero-veil"></div>
 

@@ -7,6 +7,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   gsap.registerPlugin(ScrollTrigger);
 
+  initIntroVideo();
   initCursor();
   initNav();
   initHeroAnimation();
@@ -19,6 +20,36 @@ document.addEventListener('DOMContentLoaded', () => {
   initContact();
   initLogoFallback();
 });
+
+/* ════════════════════════════════════════
+   INTRO VIDEO OVERLAY
+════════════════════════════════════════ */
+function initIntroVideo() {
+  const overlay = document.getElementById('intro-overlay');
+  const video   = document.getElementById('intro-video');
+  const skipBtn = document.getElementById('intro-skip');
+  if (!overlay || !video) return;
+
+  /* 인트로 재생 중 스크롤 잠금 */
+  document.body.style.overflow = 'hidden';
+
+  function dismiss() {
+    overlay.classList.add('fade-out');
+    document.body.style.overflow = '';
+    overlay.addEventListener('transitionend', () => {
+      overlay.classList.add('hidden');
+    }, { once: true });
+  }
+
+  /* 영상 끝나면 자연스럽게 전환 */
+  video.addEventListener('ended', dismiss);
+
+  /* 스킵 버튼 */
+  skipBtn?.addEventListener('click', dismiss);
+
+  /* 영상 로드 실패 시 즉시 스킵 (파일 없을 때 대비) */
+  video.addEventListener('error', dismiss);
+}
 
 /* ════════════════════════════════════════
    CUSTOM CURSOR
